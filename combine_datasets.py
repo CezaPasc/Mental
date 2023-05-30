@@ -14,11 +14,12 @@ naming_convetion = {
 
 
 if __name__ == "__main__":
-    path = "Mental/data/scrapped"
+    path = "Mental/data/scrapped/new"
 
-    datasets = {}
+    datasets = []
 
     label_number = 1
+    labels = {}
     for f in os.listdir(path):
         print(f)
         if not f.endswith(".csv"):
@@ -26,6 +27,7 @@ if __name__ == "__main__":
             continue
 
         name = f.replace(".csv", "")
+        name = name.replace("more_", "")
         if "combined" in name:
             continue
 
@@ -37,14 +39,18 @@ if __name__ == "__main__":
         if name == "negative_samples":
             df["label"] = "0"
         else:
-            df["label"] = str(label_number)
-            label_number += 1
+            if name in labels:
+                df["label"] = labels[name]
+            else:
+                df["label"] = str(label_number)
+                labels[name] = str(label_number)
+                label_number += 1
 
         df["label_name"] = name
         df = df.dropna()
-        datasets[name] = df
+        datasets.append(df)
 
-    total = pd.concat(datasets.values())
+    total = pd.concat(datasets)
 
     print(total.groupby("label_name")["text"].count())
 
@@ -52,4 +58,4 @@ if __name__ == "__main__":
 
     train.to_csv(path + "/t_combined_train.csv", index=False)
     validation.to_csv(path + "/t_combined_val.csv", index=False)
-    test.to_csv(path + "/t_combined_test.csv", index=False)
+    test.to_csv(path + "/t_combined_test.csv", index=False)v
